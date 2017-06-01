@@ -1,0 +1,16 @@
+{
+  "name": "luisbotdemo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "botbuilder": "^3.8.3",
+    "dotenv-extended": "^2.0.1",
+    "restify": "^4.3.0"
+  }
+}
