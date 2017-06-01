@@ -82,6 +82,8 @@ bot.dialog('OrderFood', [
         session.send(message);
         session.endDialog();
     }
+]).triggerAction({
+    matches: 'OrderFood'
 }).cancelAction('cancelOrder', "Order canceled.", {
     matches: /^(cancel|nevermind)/i,
     confirmPrompt: "Are you sure?"
@@ -114,7 +116,9 @@ bot.dialog('SearchRestaurant', [
         });
 
     }
-]);
+]).triggerAction({
+    matches: 'SearchRestaurant'
+});
 
 function restaurantAsAttachment(restaurant) {
     return new builder.HeroCard()
