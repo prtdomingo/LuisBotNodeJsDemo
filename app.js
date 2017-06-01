@@ -46,19 +46,17 @@ bot.dialog('SearchRestaurant', [
         if(geographyEntity){
             next({ response: geographyEntity.entity });
         } else {
-            builder.Prompts.text(session, 'Please enter a location');
+            builder.Prompts.text(session, 'Where?');
         }
     },
     function (session, result){
         var location = result.response;
 
-        var message = 'Looking for restaurants around %s...';
+        var message = 'Just a second, I\'m currently looking for restaurants around %s...';
         session.send(message, location);
 
         Restaurant.searchRestaurants(location).then(function (restaurants) {
-            
             session.send('I found a total of %d restaurants', restaurants.length);
-
             var message = new builder.Message()
                                      .attachmentLayout(builder.AttachmentLayout.carousel)
                                      .attachments(restaurants.map(restaurantAsAttachment));
