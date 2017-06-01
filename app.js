@@ -3,6 +3,7 @@ require('dotenv-extended').load();
 
 var builder = require('botbuilder');
 var restify = require('restify');
+var Restaurant = require('./restaurant');
 
 // setup server
 var server = restify.createServer();
@@ -39,8 +40,33 @@ bot.dialog('OrderFood', [
 
 bot.dialog('SearchRestaurant', [
     function(session, args, next){
-        session.send('Search Restaurant Dialog');
-        session.endDialog();
+
+        var geographyEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'PhilippinesGeography');
+
+        if(geographyEntity){
+            next({ response: geographyEntity.entity });
+        } else {
+            builder.Prompts.text(session, 'Please enter a location');
+        }
+    },
+    function (session, result){
+        var location = result.response;
+
+        var message = 'Looking for restaurants around %s...';
+        session.send(message, location);
+
+        Restaurant.searchRestaurants(location).then(function (restaurants) {
+            
+            session.send('I found a total of %d restaurants', restaurants.length);
+
+            var message = new builder.Message()
+                                     .attachmentLayout(builder.AttachmentLayout.carousel)
+                                     .attachments(restaurants.map(restaurantAsAttachment));
+            session.send(message);
+
+            session.endDialog();
+        });
+
     }
 ]).triggerAction({
     matches: 'SearchRestaurant',
@@ -48,3 +74,17 @@ bot.dialog('SearchRestaurant', [
         session.send('Search Restaurant OnInterrupted');
     }
 });
+
+function restaurantAsAttachment(restaurant) {
+    return new builder.HeroCard()
+                      .title(restaurant.name)
+                      .subtitle('%d stars rating.', restaurant.rating)
+                      .images([new builder.CardImage().url(restaurant.image)])
+                      .buttons([
+                          new builder.CardAction()
+                                     .title('View in Google Maps')
+                                     .type('openUrl')
+                                     .value('https://www.google.com.ph/maps/search/' + encodeURIComponent(restaurant.name) 
+                                        + ' in ' + encodeURIComponent(restaurant.location))
+                      ]);
+}
